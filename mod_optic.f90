@@ -70,6 +70,7 @@ contains
       !initialize polarization state
       k_wave =15000*(2*pi)  !cm^-1
       w_wave = 0.0d0 
+      E_vec(:)=[1.0d0,1.0d0,0.0d0]
 
    end subroutine GetInitPnt
 
@@ -167,16 +168,33 @@ contains
 
    logical function IsFlec(d_n,r_n)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!  Fresnel equation evaluation  https://en.wikipedia.org/wiki/Fresnel_equations       
 !  input:
-!     d_n: surface normal direction, pointing to the side of incoming incident light 
+!     d_n: surface normal dir, pointing to the side of incident light 
 !     r_n: refaction index ratio n1/n2  
-!              
+!  local variables:
+!     d_i: incident dir, k axis for incident light
+!     d_s: s axis in local coordiate (s p k) where k is light moving dir
+!          perpendicular to incident plane, 
+!          remains unchanged after reflection/refraction
+!     d_p: p axis in local coordiate (s p k) for incident light 
+!          o the incident plane
+!     d_pp: aka p', p axis for ougoing light
+!
+!  global variable:
+!     dir_cos: incident dir on input, aka k
+!              outgoing dir on output, aka k'
+!  
+!  References:                 
+!     Fresnel equation:  https://en.wikipedia.org/wiki/Fresnel_equations 
+!     Polarization tracking:
+!          Garam Yun et al, Three-dimensional polarization ray-tracing 
+!          calculus I: definition and diattenuation
+!     
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       implicit none
       real(R_KD), intent(in) :: d_n(3) ,r_n
 
-      real(R_KD) :: d_i(3), d_s(3), d_p(3)
+      real(R_KD) :: d_i(3), d_s(3), d_p(3), d_pp(3)
       real, parameter :: rflec(2)=[0.1,0.8]
       real rv1, prob_r
       complex (kind=8) :: csp(2),cv1
@@ -228,15 +246,6 @@ contains
       E2_sp(3)=E2_sp(1)+E2_sp(2)
 
       prob_r=(E2_sp(1)*rsp(1)+E2_sp(2)*rsp(2))/E2_sp(3)
-      !!debug section begins: output 
-      !if (n_out .lt. 12) then
-      !   n_out=n_out+1
-      !   !write(*,"('cv1=', 2(ES12.5,x),' rv1=', ES12.5  )") cv1, rv1
-      !   write(*,"('r_n=',ES12.5,'  reflectance_sp=', 2(ES12.5,2x) )") r_n,rsp(1:2)
-      !   write(*,"('p_r=',ES12.5,'  E_sp=', 4(ES12.5,2x) )") prob_r, E_sp(1:2)
-      !   !write(*,"('csp(1)=',2(ES12.5,2x),'  csp(2)=', 2(ES12.5,2x) )") (realpart(csp(i)), imagpart(csp(i)), i=1,2)
-      !endif      
-      !!debug section ends
 
       call RANDOM_NUMBER(rv1)
       IsFlec=(rv1 .le. prob_r)
@@ -245,6 +254,45 @@ contains
       else 
          call GetFracDir(d_n,r_n,IsFlec)
       endif
+
+      !update E for polarization state
+      call vec_x_prod(d_i, dir_cos,d_s)
+      d_s=d_s/vec_mag(d_s)
+
+      call vec_x_prod(d_i, d_s, d_p)
+      d_p=d_p/vec_mag(d_p)
+     
+      call vec_x_prod(dir_cos, d_s, d_pp)
+      d_pp=d_pp/vec_mag(d_p)
+      
+      E_sp=0d0
+      do i=1,3
+         E_sp(1)=E_sp(1)+d_s(i)*E_vec(i)
+         E_sp(2)=E_sp(2)+d_p(i)*E_vec(i)
+      enddo  
+      if (IsFlec) then
+         E_sp(1:2)=E_sp(1:2)*rsp(1:2)
+      else
+         E_sp(1:2)=E_sp(1:2)*(1.0d0-rsp(1:2))
+      endif
+
+      do i=1,3
+         E_vec(i)=d_s(i)*E_sp(1)+d_pp(i)*E_sp(2)
+      enddo
+         
+      !!debug section begins: output 
+      if (n_out .lt. 12) then
+         n_out=n_out+1
+         !write(*,"('cv1=', 2(ES12.5,x),' rv1=', ES12.5  )") cv1, rv1
+         !write(*,"('csp(1)=',2(ES12.5,2x),'  csp(2)=', 2(ES12.5,2x) )") (realpart(csp(i)), imagpart(csp(i)), i=1,2)
+         
+         !write(*,"('r_n=',ES12.5,'  reflectance_sp=', 2(ES12.5,2x) )") r_n,rsp(1:2)
+         !write(*,"('p_r=',ES12.5,'  E_sp=', 4(ES12.5,2x) )") prob_r, E_sp(1:2)
+         write(*,"('polarization E=', 3('(',ES12.5,x,ES12.5,')') )") (realpart(E_vec(i)), imagpart(E_vec(i)), i=1,3)
+      endif      
+      !!debug section ends
+      
+      
       !if (r_n .lt. 1) then
       !   IsFlec=(rv1 .le. rflec(1) )
       !else
@@ -252,6 +300,7 @@ contains
       !endif
 
       return
+
    end function IsFlec
 
 !--------------------------utilities--------------------------------------!
