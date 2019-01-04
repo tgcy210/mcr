@@ -35,6 +35,7 @@ module mod_optic
 
     !polarization
     integer :: n_out=0
+    complex(kind=8),parameter :: E_ini(3)=[1.0d0,1.0d0,0.0d0]
     complex(kind=8) :: E_vec(3)=[1.0d0,1.0d0,0.0d0]
     real(R_KD) :: k_wave, w_wave
     real(R_KD) :: k_zero, c_zero
@@ -70,7 +71,7 @@ contains
       !initialize polarization state
       k_wave =15000*(2*pi)  !cm^-1
       w_wave = 0.0d0 
-      E_vec(:)=[1.0d0,1.0d0,0.0d0]
+      E_vec=E_ini
 
    end subroutine GetInitPnt
 
@@ -289,6 +290,12 @@ contains
          !write(*,"('r_n=',ES12.5,'  reflectance_sp=', 2(ES12.5,2x) )") r_n,rsp(1:2)
          !write(*,"('p_r=',ES12.5,'  E_sp=', 4(ES12.5,2x) )") prob_r, E_sp(1:2)
          write(*,"('polarization E=', 3('(',ES12.5,x,ES12.5,')') )") (realpart(E_vec(i)), imagpart(E_vec(i)), i=1,3)
+         cv1=0d0
+         do i=1,3
+            cv1=cv1+E_vec(i)*dir_cos(i)
+         enddo
+         write(*,"('verifying  E \dot k =', 3('(',ES12.5,x,ES12.5,')') )") realpart(cv1), imagpart(cv1)
+
       endif      
       !!debug section ends
       
