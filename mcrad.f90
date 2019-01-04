@@ -43,14 +43,11 @@ program mcrad
      r_n=n_frac(1)/n_frac(2)
      dir_n=pos_xyz
 
-     if (IsFlec(dir_n, dir_cos, r_n)) then
-        call GetFlecDir(dir_n,dir_cos,dir_r)
-        call add_scatter(dir_r)
+     if (IsFlec(dir_n, r_n)) then
+        call add_scatter(dir_cos)
         cycle
      else
-        call GetFracDir(dir_n,dir_cos,r_n,dir_r)
         inSphere=.true.
-        dir_cos=dir_r 
 !        write(*,"('i=',I0,' dir_cos=',f10.4)") i,dir_cos(1)**2+dir_cos(2)**2+dir_cos(3)**2
         
         call RANDOM_NUMBER(rval)
@@ -61,6 +58,7 @@ program mcrad
      do while ( inSphere)
 
         r_n=n_frac(2)/n_frac(1)        
+        !calculate track length
         dot_ni=0d0
         do idx=1, 3
            dot_ni=dot_ni+dir_cos(idx)*pos_xyz(idx)
@@ -103,15 +101,8 @@ program mcrad
 !ERROR trapping  section ends
 
         dir_n=-pos_xyz
-        inSphere=IsFlec(dir_n, dir_cos, r_n)
-        if (inSphere) then
-           call GetFlecDir(dir_n, dir_cos, dir_r)
-           dir_cos=dir_r
-        else 
-           call GetFracDir(dir_n, dir_cos, r_n, dir_r, inSphere)
-           dir_cos=dir_r
-           if (.not. inSphere) call add_scatter(dir_cos)
-        endif
+        inSphere=IsFlec(dir_n, r_n)
+        if (.not. inSphere) call add_scatter(dir_cos)
      enddo
      
    enddo

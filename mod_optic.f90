@@ -76,20 +76,25 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-   subroutine GetFlecDir(d_n,d_i,d_flec)
+   subroutine GetFlecDir(d_n)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !  calculate a unit vector pointing the reflection direction
 !  Input: d_n: surface normal direction, pointing to incident light
-!         d_i: incident light, pointing to surface
 !
-!  Output: d_flec: reflected light direction
+!  local variables: 
+!     d_i: incident light, pointing to surface
+!     d_flec: reflected light direction
+!  global variable(s):
+!     dir_cos: incident dir on input, reflected dir on output
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      real(R_KD), intent(in) :: d_n(3), d_i(3)
-      real(R_KD), intent(out) :: d_flec(3)
+      implicit none
+      real(R_KD), intent(in) :: d_n(3)
 
+      real(R_KD) :: d_i(3), d_flec(3)
       real(R_KD) :: dot_ni
       integer i
 
+      d_i=dir_cos
       dot_ni=0d0
       do i=1,3
          dot_ni=dot_ni+d_n(i)*d_i(i)
@@ -103,32 +108,39 @@ contains
       endif
 
       d_flec=d_i(:)-2*dot_ni*d_n(:)
+      dir_cos=d_flec
 
    end subroutine GetFlecDir
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-   subroutine GetFracDir(d_n,d_i,r_n,d_frac,IsTir)
+   subroutine GetFracDir(d_n,r_n,IsTir)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !  calculate a unit vector pointing the refraction direction
 !  Input: d_n(3): surface normal direction, pointing to incident light
-!         d_i(3): incident light, pointing to surface
 !         r_n : ratio of refraction index n1/n2, where n1 is incident medium
-!  Output: d_frac(3): refractioned light direction if IsTir=false
-!                     reflectioned direction if IsTir=true
-!          IsTir: logical, true if total internal reflection,
+!  Output:
+!         IsTir: logical, true if total internal reflection,
 !                 if not present, assuming false always
+!  local variables
+!         d_i(3): incident light, pointing to surface
+!         d_frac(3): refractioned light direction if IsTir=false
+!                    reflectioned direction if IsTir=true
+!  global variable(s)
+!         dir_cos: incoming direction on input, refracted dir on output
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       implicit none
-      real(R_KD), intent(in) :: d_n(3), d_i(3), r_n
-      real(R_KD), intent(out) :: d_frac(3)
+      real(R_KD), intent(in) :: d_n(3), r_n
       logical,optional,intent(out) :: IsTir
 
+      real(R_KD) :: d_i(3), d_frac(3)
       real(R_KD) :: dot_ni, rv1,rv2
       integer i
       logical :: IsTir_loc=.false.
-            
+     
+      IsTir_loc=.false. 
+      d_i=dir_cos      
       dot_ni=0d0
       do i=1,3
          dot_ni=dot_ni+d_n(i)*d_i(i)
@@ -143,29 +155,28 @@ contains
       if (rv1*r_n .gt. 1) IsTir_loc=.true.    
      
       if (IsTir_loc) then
-         call GetFlecDir(d_n,d_i,d_frac)
+         call GetFlecDir(d_n)
          if (present(IsTir)) IsTir=IsTir_loc
          return
       endif
      
       d_frac=r_n*d_i(:)-(r_n*dot_ni+dsqrt(1d0-(r_n*rv1)**2))*d_n(:)
+      dir_cos=d_frac
 
    end subroutine GetFracDir
 
-   logical function IsFlec(d_n,d_i,r_n)
+   logical function IsFlec(d_n,r_n)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !  Fresnel equation evaluation  https://en.wikipedia.org/wiki/Fresnel_equations       
 !  input:
 !     d_n: surface normal direction, pointing to the side of incoming incident light 
-!     d_i: incident light direction
 !     r_n: refaction index ratio n1/n2  
 !              
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       implicit none
-      real(R_KD), intent(in) :: d_n(3), d_i(3),r_n
-      real(R_KD) :: d_s(3), d_p(3)
+      real(R_KD), intent(in) :: d_n(3) ,r_n
 
-
+      real(R_KD) :: d_i(3), d_s(3), d_p(3)
       real, parameter :: rflec(2)=[0.1,0.8]
       real rv1, prob_r
       complex (kind=8) :: csp(2),cv1
@@ -173,7 +184,7 @@ contains
       real(R_KD) :: r_cos, r_sin2, rsp(2), tsp(2),E2_sp(3)      
       complex (kind=8) :: E_sp(2)
       
-
+      d_i=dir_cos
       ! calculate reflection rate for s, p components
       r_cos=0d0
       do i=1, 3
@@ -229,7 +240,11 @@ contains
 
       call RANDOM_NUMBER(rv1)
       IsFlec=(rv1 .le. prob_r)
-
+      if (IsFlec) then
+         call GetFlecDir(d_n)
+      else 
+         call GetFracDir(d_n,r_n,IsFlec)
+      endif
       !if (r_n .lt. 1) then
       !   IsFlec=(rv1 .le. rflec(1) )
       !else
