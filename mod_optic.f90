@@ -25,17 +25,18 @@ module mod_optic
     real(R_KD) :: siga(2)=[0d0, 0.1d0]
     
     !simulation params
-    integer :: num_p=100000   
+    !number of particles    
+    integer :: num_p=100000
+    !number of cosine bins for counter
     integer,parameter :: n_tr=8
     real(R_KD), parameter :: bin_size=2d0/n_tr 
-    !counters
+    !counters arrays
     integer :: c_scatter(n_tr)=0, c_absorb=0
     integer :: c_sca_tot(n_tr)=0, c_abs_tot=0     
-        
 
     !polarization
-    integer :: n_out=0
-    complex(kind=8),parameter :: E_ini(3)=[1.0d0,1.0d0,0.0d0]
+    integer :: n_out=0, npsdbg=12
+    complex(kind=8) :: E_ini(3)=[(1d0,1d0),(1d0,2d0), (0d0,0d0) ]
     complex(kind=8) :: E_vec(3)=[1.0d0,1.0d0,0.0d0]
     real(R_KD) :: k_wave, w_wave
     real(R_KD) :: k_zero, c_zero
@@ -282,7 +283,7 @@ contains
       enddo
          
       !!debug section begins: output 
-      if (n_out .lt. 12) then
+      if (n_out .lt. npsdbg) then
          n_out=n_out+1
          !write(*,"('cv1=', 2(ES12.5,x),' rv1=', ES12.5  )") cv1, rv1
          !write(*,"('csp(1)=',2(ES12.5,2x),'  csp(2)=', 2(ES12.5,2x) )") (realpart(csp(i)), imagpart(csp(i)), i=1,2)

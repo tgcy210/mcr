@@ -8,15 +8,15 @@
 program mcrad
    
    use mod_optic
+   use mod_ioset
    use mod_utest
-   use mpi
+   use mod_mympi
    
    implicit none
    !include 'mpif.h'
    
    integer i,idx
    real :: rval
-   integer myid,totp,merr
       
    real(R_KD) :: tlen_lim, tlen, r_n, rv1
    logical :: inSphere
@@ -25,16 +25,18 @@ program mcrad
 
 !   call ut_flec
 !   stop
-   
-   call MPI_INIT(merr)
 
+#if _USE_MPI   
+   call MPI_INIT(merr)
    call MPI_COMM_SIZE(MPI_COMM_WORLD, totp, merr)
    call MPI_COMM_RANK(MPI_COMM_WORLD, myid, merr)
+#endif
 
    c_scatter=0
    c_absorb=0
    c_sca_tot=0
    c_abs_tot=0
+   call ReadInp
    do i=1, num_p
      call GetInitPnt
      call convert_c2s(pos_xyz, pos_rtp)
@@ -108,8 +110,13 @@ program mcrad
    enddo
   
    
+#if _USE_MPI   
    call MPI_REDUCE(c_scatter,c_sca_tot,n_tr,MPI_INTEGER,MPI_SUM,0, MPI_COMM_WORLD,merr)
    call MPI_REDUCE(c_absorb,c_abs_tot,1,MPI_INTEGER, MPI_SUM,0, MPI_COMM_WORLD,merr)
+#else
+   c_sca_tot=c_scatter
+   c_abs_tot=c_absorb
+#endif
     
    if (myid .eq. 0) then 
       write(*,"('number of absorbed  =',I0  )" ) c_abs_tot
@@ -120,5 +127,9 @@ program mcrad
          rv1=rv1+bin_size
       enddo
    endif
+
+#if _USE_MPI   
    call MPI_FINALIZE(merr)
+#endif
+
 end program mcrad

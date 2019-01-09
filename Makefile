@@ -1,11 +1,12 @@
 F90=mpif90
 #F90=/usr/local/bin/gfortran
 #F90=/opt/local/bin/gfortran-mp-7
-FFLAGS=-g -fbacktrace -fcheck=all
+FFLAGS=-g -cpp -fbacktrace -fcheck=all
 
 PRODUCT=mcrad.x 
 
-SRCS=mod_optic.f90 mod_utest.f90 mcrad.f90
+SRCS := mod_mympi.f90 mod_optic.f90 mod_ioset.f90 mod_utest.f90
+SRCS += mcr_main.f90
 OBJS=$(SRCS:.f90=.o)
 
 $(PRODUCT): $(OBJS)

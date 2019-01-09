@@ -1,2 +1,2 @@
 #!/bin/bash
-./mcrad.x 2>&1  | tee tmp_mcr.out
+./mcrad.x 2>&1  | tee result_mcr.out
