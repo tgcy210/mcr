@@ -26,10 +26,11 @@ program mcrad
 !   call ut_flec
 !   stop
 
-#if _USE_MPI   
-   call MPI_INIT(merr)
-   call MPI_COMM_SIZE(MPI_COMM_WORLD, totp, merr)
-   call MPI_COMM_RANK(MPI_COMM_WORLD, myid, merr)
+#ifdef _USE_MPI   
+      call MPI_INIT(merr)
+      call MPI_COMM_SIZE(MPI_COMM_WORLD, totp, merr)
+      call MPI_COMM_RANK(MPI_COMM_WORLD, myid, merr)
+      ! write(*,"('myid=', I3)") myid
 #endif
 
    c_scatter=0
@@ -110,12 +111,12 @@ program mcrad
    enddo
   
    
-#if _USE_MPI   
-   call MPI_REDUCE(c_scatter,c_sca_tot,n_tr,MPI_INTEGER,MPI_SUM,0, MPI_COMM_WORLD,merr)
-   call MPI_REDUCE(c_absorb,c_abs_tot,1,MPI_INTEGER, MPI_SUM,0, MPI_COMM_WORLD,merr)
+#ifdef _USE_MPI    
+      call MPI_REDUCE(c_scatter,c_sca_tot,n_tr,MPI_INTEGER,MPI_SUM,0, MPI_COMM_WORLD,merr)
+      call MPI_REDUCE(c_absorb,c_abs_tot,1,MPI_INTEGER, MPI_SUM,0, MPI_COMM_WORLD,merr)
 #else
-   c_sca_tot=c_scatter
-   c_abs_tot=c_absorb
+      c_sca_tot=c_scatter
+      c_abs_tot=c_absorb
 #endif
     
    if (myid .eq. 0) then 
@@ -128,8 +129,8 @@ program mcrad
       enddo
    endif
 
-#if _USE_MPI   
-   call MPI_FINALIZE(merr)
+#ifdef _USE_MPI  
+     call MPI_FINALIZE(merr)
 #endif
 
 end program mcrad

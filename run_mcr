@@ -1,2 +1,8 @@
 #!/bin/bash
-./mcrad.x 2>&1  | tee result_mcr.out
+FNAME=result_mcr.out
+
+./mcrad.x 2>&1  | tee $FNAME
+#mpirun -np 4 ./mcrad.x 2>&1 |tee $FNAME
+
+echo "" >>$FNAME
+echo "run ./mcrad.x at $(date)" >> $FNAME
