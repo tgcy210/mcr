@@ -23,8 +23,6 @@ program mcrad
 
    real(R_KD) :: dir_n(3),dir_r(3), dot_ni
 
-!   call ut_flec
-!   stop
 
 #ifdef _USE_MPI   
       call MPI_INIT(merr)
@@ -33,11 +31,20 @@ program mcrad
       ! write(*,"('myid=', I3)") myid
 #endif
 
+
    c_scatter=0
    c_absorb=0
    c_sca_tot=0
    c_abs_tot=0
    call ReadInp
+   
+   !perform unit test
+   if (nutdbg .ne. 0) then
+      write(disp_msg,"('perform testing routines ... ')") 
+      call ShowMsg(1)
+      call mcr_test      
+   endif
+
    do i=1, num_p
      call GetInitPnt
      call convert_c2s(pos_xyz, pos_rtp)

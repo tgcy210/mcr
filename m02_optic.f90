@@ -34,8 +34,11 @@ module mod_optic
     integer :: c_scatter(n_tr)=0, c_absorb=0
     integer :: c_sca_tot(n_tr)=0, c_abs_tot=0     
 
-    !polarization
+    !for debugging
     integer :: n_out=0, npsdbg=12
+    integer :: nutdbg=0  !unit test index
+
+    !polarization
     complex(kind=8) :: E_ini(3)=[(1d0,1d0),(1d0,2d0), (0d0,0d0) ]
     complex(kind=8) :: E_vec(3)=[1.0d0,1.0d0,0.0d0]
     real(R_KD) :: k_wave, w_wave
@@ -219,7 +222,9 @@ contains
       csp(1)=(rv1-cv1)/(rv1+cv1)
       rsp(1)=zabs(csp(1))**2
 
-      rv1=-r_cos/r_n
+      !rv1=-r_cos/r_n
+      rv1=-r_cos
+      cv1=cv1*r_n
       csp(2)=(cv1-rv1)/(cv1+rv1)
       rsp(2)=zabs(csp(2))**2
 
