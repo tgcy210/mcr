@@ -5,4 +5,4 @@ Evecxy = 1d0,1d0 1d0,1d0
 $1  Section 1 settings for test/debug
 npsdbg=0
 #for unit testing nutdbg=2 for 3-mirror test
-nutdbg=2
+nutdbg=3
