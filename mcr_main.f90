@@ -32,11 +32,11 @@ program mcrad
 #endif
 
 
+   call ReadInp
    c_scatter=0
    c_absorb=0
    c_sca_tot=0
    c_abs_tot=0
-   call ReadInp
    
    !perform unit test
    if (nutdbg .ne. 0) then

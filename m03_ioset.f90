@@ -76,7 +76,7 @@ subroutine ProcInp_sec0
    
    implicit none
 
-   integer, parameter :: num_keyword =2
+   integer, parameter :: num_keyword =3
    integer len_eff
    integer i,j,k
    integer ierr
@@ -85,7 +85,7 @@ subroutine ProcInp_sec0
 
    character (LEN=7) list_keyword(num_keyword)
 
-   data list_keyword /'numips', 'Evecxy' /
+   data list_keyword /'numips', 'Evecxy', 'numbin' /
    integer :: cout_keyword(num_keyword)=0
 
    real(R_KD)  rval(10) 
@@ -208,6 +208,23 @@ subroutine ProcInp_sec0
           write(disp_msg(1),"('E_xy=', 4(ES12.5,2x) )") rval(1:4)
           call ShowMsg(1)
 
+        case (3)
+          cur_var='numbin (number of cosine bins)'
+          rval=0d0
+          read(lineseg,*,err=1002,end=1002) rval(1)
+          !error check
+          if(rval(1) .ge. 1) then
+            n_tr=int(rval(1))
+            cur_key=0
+            cout_keyword(3)= cout_keyword(3)+1
+          else
+            !to be refine error message
+            write(disp_msg(1),"('invalid numbin value ')") 
+            call ShowMsg(1)
+          endif
+
+          write(disp_msg(1),"('numisp (number of trial incident light per processor) ',' : ', I10 )" )  num_p
+          call ShowMsg(1)
         case default
            write(disp_msg(1),"('invalid keyword ')") 
            call ShowMsg(1)
@@ -234,7 +251,12 @@ subroutine ProcInp_sec0
     endif
   enddo
 
-  
+  bin_size=2d0/n_tr
+  allocate( c_scatter(n_tr) ) 
+  allocate( c_sca_tot(n_tr) )
+  c_scatter=0
+  c_sca_tot=0
+ 
   return
   1002 write(disp_msg(1),"('error while processing input file: ', A)") trim(file_inp) 
   call ShowMsg(1)

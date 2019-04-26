@@ -28,11 +28,11 @@ module mod_optic
     !number of particles    
     integer :: num_p=100000
     !number of cosine bins for counter
-    integer,parameter :: n_tr=8
-    real(R_KD), parameter :: bin_size=2d0/n_tr 
+    integer :: n_tr=8
+    real(R_KD) ::  bin_size 
     !counters arrays
-    integer :: c_scatter(n_tr)=0, c_absorb=0
-    integer :: c_sca_tot(n_tr)=0, c_abs_tot=0     
+    integer :: c_absorb=0, c_abs_tot=0
+    integer, allocatable :: c_scatter(:), c_sca_tot(:)
 
     !for debugging
     integer :: n_out=0, npsdbg=12

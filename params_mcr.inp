@@ -2,7 +2,8 @@
 $0  Section 0 general settings
 numips = 1e5
 Evecxy = 1d0,1d0 1d0,1d0
+numbin = 40
 $1  Section 1 settings for test/debug
 npsdbg=0
 #for unit testing nutdbg=2 for 3-mirror test
-nutdbg=3
+nutdbg=0
