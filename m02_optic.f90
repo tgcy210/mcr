@@ -23,6 +23,7 @@ module mod_optic
     real(R_KD) :: n_frac(2)=[1.0d0, 1.50d0]
     !absorption cross section measured by 1/r  
     real(R_KD) :: siga(2)=[0d0, 0.0d0]
+    real(R_KD) :: r_size=10.0d0  !radius measured by lambda/2pi
     
     !simulation params
     !number of particles    
@@ -66,9 +67,9 @@ contains
       rad=rval(2)+rval(3)
       if (rad .gt. 1) rad=2-rad
  
-      pos_xyz(1)=rad*dcos(pos_rtp(3))
-      pos_xyz(2)=rad*dsin(pos_rtp(3))
-      pos_xyz(3)=-dsqrt(1.0d0-pos_xyz(1)**2-pos_xyz(2)**2)
+      pos_xyz(1)=rad*dcos(pos_rtp(3))*r_size
+      pos_xyz(2)=rad*dsin(pos_rtp(3))*r_size
+      pos_xyz(3)=-dsqrt(r_size**2-pos_xyz(1)**2-pos_xyz(2)**2)
       
       dir_cos=[0d0,0d0,1d0]     
 

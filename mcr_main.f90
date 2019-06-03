@@ -100,17 +100,17 @@ program mcrad
 
         pos_xyz=pos_xyz+rv1*dir_cos
         rv1= pos_xyz(1)**2+pos_xyz(2)**2+pos_xyz(3)**2
-        pos_xyz=1d0/dsqrt(rv1)*pos_xyz
+        pos_xyz=1d0*r_size/dsqrt(rv1)*pos_xyz
 
 !ERROR trapping section begins
-        if (rv1 .lt. 0.98) then
+        if (rv1/r_size**2 .lt. 0.98) then
            write(*,"('i=',I0, ' rv1=', f10.4)") i, rv1
            write(*,"('pos_xyz=', 3(f10.4,x) )") pos_xyz
            stop
         endif
 !ERROR trapping  section ends
 
-        dir_n=-pos_xyz
+        dir_n=-pos_xyz/r_size
         inSphere=IsFlec(dir_n, r_n)
         if (.not. inSphere) call add_scatter(dir_cos)
      enddo
