@@ -1,6 +1,6 @@
 #input file for mcr
 $0  Section 0 general settings
-numips = 1e5
+numips = 1e7
 Evecxy = 1d0,1d0 1d0,1d0
 numbin = 40
 $1  Section 1 settings for test/debug

@@ -20,9 +20,9 @@ module mod_optic
     real(R_KD) ::  dir_cos(3)=[0,0,1]   
     
     !material params, assuming incident light in air (m1), sphere made of water (m2)
-    real(R_KD) :: n_frac(2)=[1.0d0, 1.33d0]
+    real(R_KD) :: n_frac(2)=[1.0d0, 1.50d0]
     !absorption cross section measured by 1/r  
-    real(R_KD) :: siga(2)=[0d0, 0.1d0]
+    real(R_KD) :: siga(2)=[0d0, 0.0d0]
     
     !simulation params
     !number of particles    
