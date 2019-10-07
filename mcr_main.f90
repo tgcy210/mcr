@@ -16,7 +16,7 @@ program mcrad
    !include 'mpif.h'
    
    integer i,idx
-   real :: rval,sval(5)
+   real :: rval,sval(0:10)
       
    real(R_KD) :: tlen_lim, tlen, r_n, rv1
    logical :: inSphere
@@ -131,6 +131,11 @@ program mcrad
       write(*,"('number of scattered =',I0 )" ) sum(c_sca_tot)
       rv1=-1d0
       do i=1, n_tr
+         if (i .ge. n_tr*0.76)  then 
+            sval(0)=sval(0)+c_sca_tot(i)
+         else 
+            sval(10)=sval(10)+c_sca_tot(i)
+         endif
          if (i .gt. n_tr/2) then
             sval(2)=sval(2)+c_sca_tot(i)
          else
@@ -140,12 +145,12 @@ program mcrad
          rv1=rv1+bin_size
       enddo
       rval=sval(2)/num_p
-      sval(3)=(sval(1)+c_absorb)/num_p
-      sval(4)=1.0d0 - c_absorb*1.0d0/num_p
+      sval(3)=(sval(10)+c_absorb)/sval(0)
+      sval(4)=sval(10)/sval(0)
       sval(5)=1.0d0 - sval(1)/sval(2)
-      write(*,"('   extiction  eff.: ', f8.3 )") sval(3)
-      write(*,"('   scattering eff.: ', f8.3 )") sval(4)
-      write(*,"('   asym. factor   : ', f8.3 )") sval(5)
+      write(*,"('   extiction  eff.: ', ES12.5 )") sval(3)
+      write(*,"('   scattering eff.: ', ES12.5 )") sval(4)
+      !write(*,"('   asym. factor   : ', f8.3 )") sval(5)
       
    
    endif

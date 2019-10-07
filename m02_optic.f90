@@ -29,7 +29,8 @@ module mod_optic
     integer :: num_p=100000
     !number of cosine bins for counter
     integer :: n_tr=8
-    real(R_KD) ::  bin_size 
+    real(R_KD) ::  bin_size
+    real(R_KD) ::  fwd_co=0.76
     !counters arrays
     integer :: c_absorb=0, c_abs_tot=0
     integer, allocatable :: c_scatter(:), c_sca_tot(:)
@@ -59,12 +60,12 @@ contains
       real :: rval(3), rad
       
       pos_rtp(1)=1.0d0
-      pos_rtp(2)=1.0  !cos(theta)
+      pos_rtp(2)=1.0d0  !cos(theta)
       call RANDOM_NUMBER(rval)
       pos_rtp(3)=2*pi*rval(1)-pi
       
       rad=rval(2)+rval(3)
-      if (rad .gt. 1) rad=2-rad
+      if (rad .gt. 1) rad=2d0-rad
  
       pos_xyz(1)=rad*dcos(pos_rtp(3))
       pos_xyz(2)=rad*dsin(pos_rtp(3))
@@ -106,7 +107,7 @@ contains
          dot_ni=dot_ni+d_n(i)*d_i(i)
       enddo
      
-      if (dot_ni .ge. 0) then
+      if (dot_ni .gt. 0) then
          write(*,"('ERROR: dot_ni is greater or equal zero in GetFlecDir:', f10.4 )") dot_ni
          write(*,"('dir_n=', 3(f8.4,x))") d_n
          write(*,"('dir_i=', 3(f8.4,x))") d_i
@@ -352,7 +353,8 @@ contains
       integer ibin
        
       ibin=int((1d0+d_r(3))/bin_size)+1
-      if (ibin .gt. n_tr .or. ibin .lt. 1) then
+      if (ibin .gt. n_tr) ibin=n_tr
+      if (ibin .lt. 1) then
          write(*,"('ERROR: in add_scatter, d_r(3)=', f10.4)") d_r(3)
       else
          c_scatter(ibin)=c_scatter(ibin)+1

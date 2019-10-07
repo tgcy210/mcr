@@ -1,0 +1,54 @@
+numisp (number of trial incident light per processor)  :   10000000
+E_xy= 1.00000E+00   1.00000E+00   1.00000E+00   1.00000E+00
+numisp (number of trial incident light per processor)  :   10000000
+number of absorbed  =0
+number of scattered =10000000
+   scattered to [  -1.000    -0.956]: 234591
+   scattered to [  -0.956    -0.911]: 299542
+   scattered to [  -0.911    -0.867]: 12035
+   scattered to [  -0.867    -0.822]: 10403
+   scattered to [  -0.822    -0.778]: 9473
+   scattered to [  -0.778    -0.733]: 9668
+   scattered to [  -0.733    -0.689]: 9102
+   scattered to [  -0.689    -0.644]: 9148
+   scattered to [  -0.644    -0.600]: 9190
+   scattered to [  -0.600    -0.556]: 9237
+   scattered to [  -0.556    -0.511]: 9771
+   scattered to [  -0.511    -0.467]: 9701
+   scattered to [  -0.467    -0.422]: 10319
+   scattered to [  -0.422    -0.378]: 11166
+   scattered to [  -0.378    -0.333]: 13267
+   scattered to [  -0.333    -0.289]: 12673
+   scattered to [  -0.289    -0.244]: 9720
+   scattered to [  -0.244    -0.200]: 9962
+   scattered to [  -0.200    -0.156]: 10225
+   scattered to [  -0.156    -0.111]: 10413
+   scattered to [  -0.111    -0.067]: 10634
+   scattered to [  -0.067    -0.022]: 43291
+   scattered to [  -0.022     0.022]: 29407
+   scattered to [   0.022     0.067]: 27725
+   scattered to [   0.067     0.111]: 30837
+   scattered to [   0.111     0.156]: 37093
+   scattered to [   0.156     0.200]: 45890
+   scattered to [   0.200     0.244]: 57412
+   scattered to [   0.244     0.289]: 72521
+   scattered to [   0.289     0.333]: 89963
+   scattered to [   0.333     0.378]: 111835
+   scattered to [   0.378     0.422]: 138360
+   scattered to [   0.422     0.467]: 167810
+   scattered to [   0.467     0.511]: 202501
+   scattered to [   0.511     0.556]: 242692
+   scattered to [   0.556     0.600]: 292205
+   scattered to [   0.600     0.644]: 348919
+   scattered to [   0.644     0.689]: 415015
+   scattered to [   0.689     0.733]: 498072
+   scattered to [   0.733     0.778]: 597414
+   scattered to [   0.778     0.822]: 720112
+   scattered to [   0.822     0.867]: 877784
+   scattered to [   0.867     0.911]: 1084156
+   scattered to [   0.911     0.956]: 1362232
+   scattered to [   0.956     1.000]: 1776514
+   extiction  eff.:  2.17268E-01
+   scattering eff.:  2.17268E-01
+
+run ./mcrad.x at Mon Oct  7 15:53:54 EDT 2019
