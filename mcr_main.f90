@@ -22,7 +22,7 @@ program mcrad
    logical :: inSphere
 
    real(R_KD) :: dir_n(3),dir_r(3), dot_ni
-
+   integer rk
 
 #ifdef _USE_MPI   
       call MPI_INIT(merr)
@@ -48,13 +48,14 @@ program mcrad
    do i=1, num_p
      call GetInitPnt
      call convert_c2s(pos_xyz, pos_rtp)
-     
+    
+     rk=0 
      
      r_n=n_frac(1)/n_frac(2)
      dir_n=pos_xyz
 
      if (IsFlec(dir_n, r_n)) then
-        call add_scatter(dir_cos)
+        call add_scatter(dir_cos,rk)
         cycle
      else
         inSphere=.true.
@@ -66,7 +67,7 @@ program mcrad
      endif
 
      do while ( inSphere)
-
+        rk=rk+1
         r_n=n_frac(2)/n_frac(1)        
         !calculate track length
         dot_ni=0d0
@@ -112,7 +113,7 @@ program mcrad
 
         dir_n=-pos_xyz
         inSphere=IsFlec(dir_n, r_n)
-        if (.not. inSphere) call add_scatter(dir_cos)
+        if (.not. inSphere) call add_scatter(dir_cos,rk)
      enddo
      
    enddo
@@ -120,9 +121,11 @@ program mcrad
    
 #ifdef _USE_MPI    
       call MPI_REDUCE(c_scatter,c_sca_tot,n_tr,MPI_INTEGER,MPI_SUM,0, MPI_COMM_WORLD,merr)
+      call MPI_REDUCE(c_tracker,c_trk_tot,n_tr,MPI_INTEGER,MPI_SUM,0, MPI_COMM_WORLD,merr)
       call MPI_REDUCE(c_absorb,c_abs_tot,1,MPI_INTEGER, MPI_SUM,0, MPI_COMM_WORLD,merr)
 #else
       c_sca_tot=c_scatter
+      c_trk_tot=c_tracker
       c_abs_tot=c_absorb
 #endif
    sval=0.0d0 
@@ -148,6 +151,12 @@ program mcrad
       sval(3)=(sval(10)+c_absorb)/sval(0)
       sval(4)=sval(10)/sval(0)
       sval(5)=1.0d0 - sval(1)/sval(2)
+
+      sval(6)=c_trk_tot(1)
+      sval(7)=sum(c_trk_tot)-sval(6)
+!      sval(3)=(sval(7)+c_absorb)/sval(6)
+!      sval(4)=sval(7)/sval(6)      
+      
       write(*,"('   extiction  eff.: ', ES12.5 )") sval(3)
       write(*,"('   scattering eff.: ', ES12.5 )") sval(4)
       !write(*,"('   asym. factor   : ', f8.3 )") sval(5)

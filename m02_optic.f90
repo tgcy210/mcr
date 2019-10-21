@@ -28,12 +28,13 @@ module mod_optic
     !number of particles    
     integer :: num_p=100000
     !number of cosine bins for counter
-    integer :: n_tr=8
+    integer :: n_tr=8, n_rk=50
     real(R_KD) ::  bin_size
     real(R_KD) ::  fwd_co=0.76
     !counters arrays
     integer :: c_absorb=0, c_abs_tot=0
     integer, allocatable :: c_scatter(:), c_sca_tot(:)
+    integer, allocatable :: c_tracker(:), c_trk_tot(:)
 
     !for debugging
     integer :: n_out=0, npsdbg=12
@@ -343,13 +344,14 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-   subroutine add_scatter(d_r)     
+   subroutine add_scatter(d_r, rk)     
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !  counting outgoing light into cosine bins
 !  Input: d_r: outgoing direction
 !  
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       real(R_KD) :: d_r(3)
+      integer rk
       integer ibin
        
       ibin=int((1d0+d_r(3))/bin_size)+1
@@ -359,6 +361,12 @@ contains
       else
          c_scatter(ibin)=c_scatter(ibin)+1
       endif
+      if (rk .lt. n_rk) then
+         c_tracker(rk) = c_tracker(rk)+1
+      else
+         c_tracker(n_rk) = c_tracker(n_rk)+1
+      endif
+
    end subroutine add_scatter
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
