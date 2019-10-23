@@ -254,8 +254,8 @@ subroutine ProcInp_sec0
   bin_size=2d0/n_tr
   allocate( c_scatter(n_tr) ) 
   allocate( c_sca_tot(n_tr) )
-  allocate( c_tracker(0:n_rk) )
-  allocate( c_trk_tot(0:n_rk) )
+  allocate( c_tracker(n_tr,0:n_rk) )
+  allocate( c_trk_tot(n_tr,0:n_rk) )
   c_scatter=0
   c_sca_tot=0
   c_tracker=0

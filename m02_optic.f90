@@ -22,7 +22,7 @@ module mod_optic
     !material params, assuming incident light in air (m1), sphere made of water (m2)
     real(R_KD) :: n_frac(2)=[1.0d0, 1.50d0]
     !absorption cross section measured by 1/r  
-    real(R_KD) :: siga(2)=[0d0, 0.0d0]
+    real(R_KD) :: siga(2)=[0d0, 0.1d0]
     
     !simulation params
     !number of particles    
@@ -31,10 +31,11 @@ module mod_optic
     integer :: n_tr=8, n_rk=50
     real(R_KD) ::  bin_size
     real(R_KD) ::  fwd_co=0.76
+    real(R_KD) :: r_sph = 1.d0     
     !counters arrays
     integer :: c_absorb=0, c_abs_tot=0
     integer, allocatable :: c_scatter(:), c_sca_tot(:)
-    integer, allocatable :: c_tracker(:), c_trk_tot(:)
+    integer, allocatable :: c_tracker(:,:), c_trk_tot(:,:)
 
     !for debugging
     integer :: n_out=0, npsdbg=12
@@ -68,9 +69,10 @@ contains
       rad=rval(2)+rval(3)
       if (rad .gt. 1) rad=2d0-rad
  
-      pos_xyz(1)=rad*dcos(pos_rtp(3))
-      pos_xyz(2)=rad*dsin(pos_rtp(3))
-      pos_xyz(3)=-dsqrt(1.0d0-pos_xyz(1)**2-pos_xyz(2)**2)
+      pos_xyz(1)=rad*dcos(pos_rtp(3))*r_sph
+      pos_xyz(2)=rad*dsin(pos_rtp(3))*r_sph
+      !pos_xyz(3)=-dsqrt(1.0d0-pos_xyz(1)**2-pos_xyz(2)**2)
+      pos_xyz(3)=-dsqrt(r_sph**2-pos_xyz(1)**2-pos_xyz(2)**2)
       
       dir_cos=[0d0,0d0,1d0]     
 
@@ -146,7 +148,8 @@ contains
       real(R_KD) :: dot_ni, rv1,rv2
       integer i
       logical :: IsTir_loc=.false.
-     
+
+
       IsTir_loc=.false. 
       d_i=dir_cos      
       dot_ni=0d0
@@ -362,9 +365,9 @@ contains
          c_scatter(ibin)=c_scatter(ibin)+1
       endif
       if (rk .lt. n_rk) then
-         c_tracker(rk) = c_tracker(rk)+1
+         c_tracker(ibin,rk) = c_tracker(ibin,rk)+1
       else
-         c_tracker(n_rk) = c_tracker(n_rk)+1
+         c_tracker(ibin,n_rk) = c_tracker(ibin,n_rk)+1
       endif
 
    end subroutine add_scatter

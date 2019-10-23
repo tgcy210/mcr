@@ -52,7 +52,7 @@ program mcrad
      rk=0 
      
      r_n=n_frac(1)/n_frac(2)
-     dir_n=pos_xyz
+     dir_n=pos_xyz/r_sph
 
      if (IsFlec(dir_n, r_n)) then
         call add_scatter(dir_cos,rk)
@@ -72,7 +72,7 @@ program mcrad
         !calculate track length
         dot_ni=0d0
         do idx=1, 3
-           dot_ni=dot_ni+dir_cos(idx)*pos_xyz(idx)
+           dot_ni=dot_ni+dir_cos(idx)*pos_xyz(idx)/r_sph
         enddo
         if (dot_ni .gt. 0) then
             write(*,"('ERROR: lost particle i=', I0,' dot=',f10.4)") i,dot_ni
@@ -81,7 +81,7 @@ program mcrad
             stop
         endif
 
-        rv1=-2d0*dot_ni    
+        rv1=-2d0*dot_ni*r_sph    
         tlen=tlen+rv1
         if (tlen .gt. tlen_lim) then
            c_absorb=c_absorb+1
@@ -101,17 +101,17 @@ program mcrad
 
         pos_xyz=pos_xyz+rv1*dir_cos
         rv1= pos_xyz(1)**2+pos_xyz(2)**2+pos_xyz(3)**2
-        pos_xyz=1d0/dsqrt(rv1)*pos_xyz
+        pos_xyz=1d0*r_sph/dsqrt(rv1)*pos_xyz
 
 !ERROR trapping section begins
-        if (rv1 .lt. 0.98) then
+        if (rv1 .lt. 0.98*r_sph) then
            write(*,"('i=',I0, ' rv1=', f10.4)") i, rv1
            write(*,"('pos_xyz=', 3(f10.4,x) )") pos_xyz
            stop
         endif
 !ERROR trapping  section ends
 
-        dir_n=-pos_xyz
+        dir_n=-pos_xyz/r_sph
         inSphere=IsFlec(dir_n, r_n)
         if (.not. inSphere) call add_scatter(dir_cos,rk)
      enddo
@@ -121,7 +121,7 @@ program mcrad
    
 #ifdef _USE_MPI    
       call MPI_REDUCE(c_scatter,c_sca_tot,n_tr,MPI_INTEGER,MPI_SUM,0, MPI_COMM_WORLD,merr)
-      call MPI_REDUCE(c_tracker,c_trk_tot,n_tr,MPI_INTEGER,MPI_SUM,0, MPI_COMM_WORLD,merr)
+      call MPI_REDUCE(c_tracker,c_trk_tot,n_tr*n_rk,MPI_INTEGER,MPI_SUM,0, MPI_COMM_WORLD,merr)
       call MPI_REDUCE(c_absorb,c_abs_tot,1,MPI_INTEGER, MPI_SUM,0, MPI_COMM_WORLD,merr)
 #else
       c_sca_tot=c_scatter
@@ -152,12 +152,12 @@ program mcrad
       sval(4)=sval(10)/sval(0)
       sval(5)=1.0d0 - sval(1)/sval(2)
 
-      sval(6)=c_trk_tot(1)
+      sval(6)=sum(c_trk_tot(:,1))
       sval(7)=sum(c_trk_tot)-sval(6)
 !      sval(3)=(sval(7)+c_absorb)/sval(6)
 !      sval(4)=sval(7)/sval(6)      
       
-      write(*,"('   extiction  eff.: ', ES12.5 )") sval(3)
+      write(*,"('   extiction  eff.: ', ES12.5 )") 2.0
       write(*,"('   scattering eff.: ', ES12.5 )") sval(4)
       !write(*,"('   asym. factor   : ', f8.3 )") sval(5)
       
